@@ -1,8 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
-
-const { JWT_SECRET = "dev-secret" } = process.env;
+const { JWT_SECRET } = require("../utils/config");
 
 const createUser = async (req, res, next) => {
   try {
@@ -25,10 +24,10 @@ const createUser = async (req, res, next) => {
       .status(201)
       .json({ message: "User created successfully", user: userResponse });
   } catch (err) {
-    if (err.code === 11000) {
-      return res.status(400).json({ message: "User already exists" });
+    if (err.code === "ValidationError") {
+      return res.status(400).json({ message: "Invalid input" });
     }
-    next(err);
+    return next(err);
   }
 };
 
@@ -49,7 +48,7 @@ const signIn = async (req, res, next) => {
     const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "7d" });
     res.json({ token });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
@@ -61,7 +60,7 @@ const getCurrentUser = async (req, res, next) => {
     }
     res.json({ message: "User fetched successfully", user });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 

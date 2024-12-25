@@ -12,7 +12,7 @@ const getArticles = async (req, res, next) => {
     if (err.message === "No articles found") {
       return res.status(404).json({ message: "No articles found" });
     }
-    next(err);
+    return next(err);
   }
 };
 
@@ -28,11 +28,14 @@ const createArticle = async (req, res, next) => {
       source,
       link,
       image,
-      owner: req.body._id,
+      owner: req.user._id,
     });
+
+    await article.populate("owner");
+
     res.status(201).json({ message: "Article created successfully", article });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
@@ -54,7 +57,7 @@ const deleteArticle = async (req, res, next) => {
     await Article.findByIdAndDelete(articleId);
     res.json({ message: "Article deleted successfully" });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
