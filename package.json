@@ -10,5 +10,8 @@
   "keywords": [],
   "author": "Peyton",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "mongoose": "^8.9.2"
+  }
 }
