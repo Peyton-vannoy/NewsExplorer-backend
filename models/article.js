@@ -24,22 +24,22 @@ const articleSchema = new mongoose.Schema({
   link: {
     type: String,
     required: true,
-    // validate: {
-    //   validator: function (v) {
-    //     return /^(https?:\/\/)?[^\s/$.?#].[^\s]*$/.test(v);
-    //   },
-    //   message: "Invalid URL",
-    // },
+    validate: {
+      validator(value) {
+        return validator.isURL(value);
+      },
+      message: "You must enter a valid URL",
+    },
   },
   image: {
     type: String,
     required: true,
-    // validate: {
-    //   validator: function (v) {
-    //     return /^(https?:\/\/)?[^\s/$.?#].[^\s]*$/.test(v);
-    //   },
-    //   message: "Invalid URL",
-    // },
+    validate: {
+      validator(value) {
+        return validator.isURL(value);
+      },
+      message: "You must enter a valid URL",
+    },
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
