@@ -1,11 +1,13 @@
 const router = require("express").Router();
 const { celebrate, Joi } = require("celebrate");
+const auth = require("../middlewares/auth");
 const {
   getArticles,
   createArticle,
   deleteArticle,
 } = require("../controllers/articles");
 
+// Protect all routes
 router.use(auth);
 
 router.get("/", getArticles);

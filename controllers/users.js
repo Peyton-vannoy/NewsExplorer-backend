@@ -1,10 +1,53 @@
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const User = require("../models/user");
+
+const { JWT_SECRET = "dev-secret" } = process.env;
 
 const createUser = async (req, res, next) => {
   try {
     const { email, password, username } = req.body;
-    const user = await User.create({ email, password, username });
-    res.status(201).json({ message: "User created successfully", user });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await User.create({
+      email,
+      password: hashedPassword,
+      username,
+    });
+
+    // Dont send password in response
+    const userResponse = {
+      _id: user._id,
+      email: user.email,
+      username: user.username,
+    };
+
+    res
+      .status(201)
+      .json({ message: "User created successfully", user: userResponse });
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+    next(err);
+  }
+};
+
+const signIn = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email }).select("+password");
+
+    if (!user) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "7d" });
+    res.json({ token });
   } catch (err) {
     next(err);
   }
@@ -22,4 +65,4 @@ const getCurrentUser = async (req, res, next) => {
   }
 };
 
-module.exports = { createUser, getCurrentUser };
+module.exports = { createUser, getCurrentUser, signIn };

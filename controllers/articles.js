@@ -3,9 +3,15 @@ const Article = require("../models/article");
 // Get all articles for the current user
 const getArticles = async (req, res, next) => {
   try {
-    const articles = await Article.find({ owner: req.user._id });
-    res.json(articles);
+    const articles = await Article.find({ owner: req.user._id })
+      .populate("owner", ["username", "email"])
+      .orFail(new Error("No articles found"));
+
+    res.json({ data: articles });
   } catch (err) {
+    if (err.message === "No articles found") {
+      return res.status(404).json({ message: "No articles found" });
+    }
     next(err);
   }
 };
